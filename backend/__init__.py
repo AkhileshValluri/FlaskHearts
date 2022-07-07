@@ -20,9 +20,15 @@ login_manager.init_app(app)
 def load_user(user_id):
     return User.query.filter_by(id = int(user_id)).first()
 
+#importing api routes | not necessary, jic
 from backend.flashcards import deckRoutes, cardRoutes, file_management
 from backend.users import userRoutes
 from backend.authentication import routes
+from backend.notes import pageRoutes, notebookRoutes
+from backend.quizzes import questionRoutes, optionRoutes, quizRoutes
 
+#importing models
 from backend.flashcards import Deck, Card
 from backend.users.userModel import User
+from backend.notes import Notebook, Page
+from backend.quizzes import Quiz, Question, Option
