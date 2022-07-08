@@ -3,7 +3,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from backend.flashcards import Card, Deck
 from flask_restful import Resource
 from flask import jsonify, request, make_response, send_from_directory, render_template, send_file
-from tasks import *
+import TaskManager
 # from backend.flashcards.file_management.tasks import csvify, htmlify
 import numpy as np 
 import pandas as pd
@@ -39,7 +39,7 @@ class csv(Resource): #flashcards/csv/<did>
         res = make_response(df.to_csv(), 200) 
         res.mimetype = "text/plain"
 
-        result = sendCards.delay( did, current_user.id,csv = df.to_csv(), html = None)
+        result = TaskManager.sendCards.delay( did, current_user.id,csv = df.to_csv(), html = None)
         print(result.status)
 
         return res     
@@ -71,7 +71,7 @@ class html(Resource): #flashcards/html/<did>
         f = open("./backend/templates/demo.html", "w")
         f.write(output_from_parsed_template)
 
-        result = sendCards.delay( did, current_user.id,None, html = output_from_parsed_template)
+        result = TaskManager.sendCards.delay( did, current_user.id,None, html = output_from_parsed_template)
         print(result.status) 
 
         return make_response(output_from_parsed_template)

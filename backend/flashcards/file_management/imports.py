@@ -2,7 +2,8 @@ from backend import api, app
 from flask_login import  current_user 
 from flask_restful import Resource
 from flask import jsonify, request, make_response
-from tasks import *
+import TaskManager 
+import os
 import pandas as pd
 from werkzeug.utils import secure_filename
 
@@ -28,7 +29,7 @@ class imp(Resource): #/flashcards/import
         if not filename.split('.')[1] in ['csv', 'txt'] or not f: 
             return make_response(jsonify({"msg" : "File type is not correct"}))
 
-        result = addCards.delay(filename, current_user.id)
+        result = TaskManager.addCards.delay(filename, current_user.id)
         print(result.status)
         return make_response(jsonify({"msg" : "Processing file currently"}), 200 )
         
