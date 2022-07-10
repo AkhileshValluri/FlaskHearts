@@ -1,5 +1,5 @@
 from TaskManager import celery, SENDGRID_API_KEY
-from backend import User, Deck, Card, app, api
+from backend import *
 import pandas as pd 
 import os
 import base64

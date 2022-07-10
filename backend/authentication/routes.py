@@ -6,6 +6,14 @@ from flask_restful import Resource
 
 class login(Resource): 
 
+    def get(self): 
+        """Returns 200 if user is logged in or else 201"""
+        if current_user.is_authenticated: 
+            return make_response(jsonify({'msg' : 'You are logged in'}), 200) 
+        else: 
+            return make_response(jsonify({'msg' : 'User is not logged in'}), 201) 
+    
+
     def post(self): 
         """
         Takes in the email, username and password information
