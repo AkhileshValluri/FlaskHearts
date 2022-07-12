@@ -1,15 +1,14 @@
 import datetime
-import json
-from urllib import response
-from backend import app, login_manager, api, db
-from flask_login import login_required, login_user, logout_user, current_user 
+import resource
+from backend import app, login_required, api, db
 from backend.flashcards import Card, Deck
 from backend.users import User
 from flask_restful import Resource
-from flask import jsonify, request, make_response
+from flask import jsonify, request, make_response, request_tearing_down
+import jwt
 
 class allDecks(Resource):
-
+    @login_required
     def get(self): 
         """
         Returns all the decks which have been made as iterable array
@@ -50,8 +49,9 @@ class allDecks(Resource):
             colour, description
         Returns 201 if data error or user not logged in"""
         
-        if not current_user.is_authenticated: 
-            return make_response(jsonify({"error" : "Please log in"}), 201)
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data['username']).first()
 
         deck = request.get_json() 
 
@@ -68,7 +68,7 @@ class allDecks(Resource):
 
             last_seen = datetime.datetime.now()
 
-            user_id = current_user.id 
+            user_id = user.id 
 
             newDeck = Deck(
                 name = deck['name'], 
@@ -118,9 +118,6 @@ class singleDeck(Resource):
         Checks for only the values that are udpated
         If user is not logged in returns 201"""
 
-        if not current_user.is_authenticated: 
-            return make_response(jsonify({"error" : "Please log in"}), 201) 
-
         oldDeck = Deck.query.filter_by(id = did).first()
         changes = request.get_json() 
 
@@ -155,9 +152,6 @@ class singleDeck(Resource):
         Deletes Cards also
         Returns 201 if deck doesn't exist or user not logged in"""
 
-        if not current_user.is_authenticated: 
-            return make_response(jsonify({"error" : "Please log in"}), 201) 
-
         #checking if the deck exists at all
         if Deck.query.filter_by(id = did).first(): 
             Deck.query.filter_by(id = did).delete()
@@ -175,8 +169,12 @@ class specificDecks(Resource): #user/deck
         """Returns all the decks of the current logged in user
         200 if ok 
         201 if error with error"""
+        
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])     
+        user = User.query.filter_by(username = data['username']).first()
 
-        decks = Deck.query.filter_by(user_id = current_user.id)
+        decks = Deck.query.filter_by(user_id = user.id)
         output = [] 
         
         for deck in decks: 

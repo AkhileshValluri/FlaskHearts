@@ -1,37 +1,29 @@
-from backend import app, api, db, login_manager, load_user
-from flask_login import login_required, login_user, logout_user, current_user
+from backend import api, app, login_required
 from backend.users.userModel import User 
 from flask import jsonify, request, make_response
 from flask_restful import Resource
+import jwt
+import datetime
 
 class login(Resource): 
 
     def get(self): 
-        """Returns 200 if user is logged in or else 201"""
-        if current_user.is_authenticated: 
-            return make_response(jsonify({'msg' : 'You are logged in'}), 200) 
-        else: 
-            return make_response(jsonify({'msg' : 'User is not logged in'}), 201) 
-    
-
-    def post(self): 
         """
-        Takes in the email, username and password information
+        Takes in the email, username and password information as the authentication in the header of request
+        Returns the token in the body of the message
         If username doesn't exist or password doesn't match returns 404
+        200 if success
         """
-        data = request.get_json() 
-        user = User.query.filter_by(username = data['username']).first() 
-        if user: 
-            #checking if passwords match
-            if user.password == data['password']:                
-                login_user(user) 
-                return make_response(jsonify({"msg": "Login succesfull", "uid" : user.id}), 200) 
-            else:
-                return make_response(jsonify({"error":"Passwords don't match"}), 404)
-            
-        #if the user with that username doesn't exist 
-        else: 
-            return make_response(jsonify({"error":"User doesn't exist"}), 404)
+        auth = request.authorization
+        print(auth) 
+        
+        user = User.query.filter_by(username = auth.username).first() 
+    
+        if auth and user and user.password ==  auth.password: #if the user exists and password matches
+            token = jwt.encode({'username' : auth.username, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+            return jsonify({'token' : token.decode('UTF-8')})
+        else:   
+            return make_response('could not verify', 401, {'WWW-Authenticate': 'Basic realm="Login required"'})
 
 class logout(Resource):
     """
@@ -39,11 +31,11 @@ class logout(Resource):
     """
     @login_required
     def get(self): 
-        logout_user()
+
         return make_response(jsonify({"msg": "Logout succesfull"}), 200)
     
     def post(self): 
-        logout_user()
+        
         return make_response(jsonify({"msg": "Logout succesfull"}), 200)
 
 

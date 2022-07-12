@@ -3,8 +3,8 @@
         <div class="card-body">
             <div class="card-title">
                 <div class="btn-group" role="group" aria-label="Basic example">
-                    <button type="button" class="btn btn-outline-info" v-on:click="changeSeen(false)">Sign In</button>
-                    <button type="button" class="btn btn-outline-info" v-on:click="changeSeen(true)">Sign Up</button>
+                    <button type="button" class="btn btn-outline-info" v-on:click="toggleSeen(false)">Sign In</button>
+                    <button type="button" class="btn btn-outline-info" v-on:click="toggleSeen(true)">Sign Up</button>
                 </div>
             </div>
             <h6 class="card-subtitle mb-2 text-muted" v-show="this.newUser">Make a new account to start your journey
@@ -39,16 +39,21 @@
                         v-model="this.confirmPassword">
                 </div>
             </div>
-            <input type="password" class="form-control " id="login" placeholder="Enter password" v-model="password" />
+            <input type="password" class="form-control " id="login" placeholder="Enter password" v-model="password"
+                v-show="!newUser" />
             <button class="btn btn-outline-success" type="button" v-on:click="onSubmit"> Continue </button>
 
             </p>
+        </div>
+        <div class="alert alert-warning" role="alert" v-show="this.$store.state.loginError">
+            {{this.$store.state.login_error}}
         </div>
     </div>
 </template>
 
 <script>
-
+import { mapActions } from 'vuex'
+import { mapMutations } from 'vuex'
 export default {
     name: 'LoginView',
     data() {
@@ -59,16 +64,47 @@ export default {
             email: '',
             password: '',
             confirmPassword: '',
+
         }
     },
     methods: {
-        changeSeen(val) {
+        ...mapActions({
+            signIn: 'signIn',
+            signUp: 'signUp'
+        }),
+        ...mapMutations({
+            updateDetails: 'updateUserDetails',
+            changeError: 'updateError'
+        }),
+        toggleSeen(val) {
             this.newUser = val
         },
         onSubmit() {
-
+            if (this.newUser) {
+                if (this.password === this.confirmPassword && this.email && this.phoneNumber && this.username) {
+                    let userObj = {
+                        'username': this.username,
+                        'phone_number': this.phoneNumber,
+                        'email': this.email,
+                        'password': this.password
+                    }
+                    console.log(userObj)
+                    this.signUp(userObj)
+                }
+                else {
+                    error = 'Please fill the fields properly'
+                    this.changeError(error)
+                }
+            } else {
+                let userObj = {
+                    'username': this.username,
+                    'password': this.password
+                }
+                this.signIn(userObj)
+            }
         }
-    }
+    },
+
 }
 </script>
 

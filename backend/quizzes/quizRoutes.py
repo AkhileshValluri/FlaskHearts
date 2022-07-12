@@ -1,10 +1,11 @@
 import datetime
-from backend import api, db 
-from flask_login import current_user
+from backend import api, db, app, login_required
+import jwt
+from backend.authentication.routes import login
 from backend.quizzes.quizModel import Quiz, Question, Option 
 from flask import jsonify, request, make_response
 from flask_restful import Resource
-
+from backend.users import User
 class allQuizzes(Resource): 
 
     def get(self): 
@@ -34,10 +35,10 @@ class allQuizzes(Resource):
         """"
         Only sets the given attributes. Rest all are set to the default
         201 if name not given or not logged in """
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
 
-        if not current_user.is_authenticated: 
-            return make_response(jsonify({"error" : "Please Log in"}), 201) 
-        
         data = request.get_json()
         try : 
             name = data['name'] 
@@ -60,7 +61,7 @@ class allQuizzes(Resource):
         if 'duration' in data.keys(): 
             duration = data['duration'] 
         
-        user_id = current_user.id
+        user_id = user.id
 
         quiz = Quiz(name = name, colour = colour, description = description,
             score = score, created = created, duration = duration, user_id = user_id) 
@@ -70,7 +71,7 @@ class allQuizzes(Resource):
         return 200 
 
 class singleQuiz(Resource): 
-
+    @login_required
     def get(self, qid): 
         """
         Gets the specific quiz with all attributes
@@ -99,12 +100,14 @@ class singleQuiz(Resource):
         Deletes quiz and all questions and options for questions
         Checks for login 
         201 if quiz doesn't exist or not logged in """
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
 
         quiz = Quiz.query.filter_by(id = qid).first()
 
         if not quiz or\
-            quiz.user_id != current_user.id or\
-            not current_user.is_authenticated:
+            quiz.user_id != user.id :
             return make_response(jsonify({'error' : 'Do not have permission'}), 201) 
 
         Option.query.filter_by(quiz_id = quiz.id).delete() 
@@ -121,10 +124,12 @@ class singleQuiz(Resource):
         Returns 201 incase no quiz or not logged in """
 
         quiz = Quiz.query.filter_by(id = qid).first() 
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
 
         if not quiz or\
-            quiz.user_id != current_user.id or\
-            not current_user.is_authenticated:
+            quiz.user_id != user.id:
             return make_response(jsonify({'error' : 'Do not have permission'}), 201) 
         
         data = request.get_json() 
@@ -143,13 +148,14 @@ class singleQuiz(Resource):
         return 200 
 
 class specificQuiz(Resource): 
+    @login_required
 
     def get(self):
         """Gets all quizzes for logged in user"""
-        if not current_user.is_authenticated: 
-            return make_response(jsonify({"error" : "dont have permission"}), 201) 
-
-        quizzes = Quiz.query.filter_by(user_id = current_user.id).first()
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
+        quizzes = Quiz.query.filter_by(user_id = user.id).first()
         output = []
         for quiz in quizzes: 
 

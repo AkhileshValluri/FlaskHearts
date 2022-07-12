@@ -1,12 +1,13 @@
 import datetime
-from backend import app, login_manager, api, db 
-from flask_login import login_required, login_user, logout_user, current_user 
+from backend import app, api, db, login_required 
 from backend.flashcards import Card, Deck
+from backend.users import User
 from flask_restful import Resource
 from flask import jsonify, request, make_response
+import jwt
 
 class allCards(Resource):
-    
+    @login_required
     def get(self):
         """
         Returns all the cards as an iterable array"""
@@ -38,17 +39,22 @@ class allCards(Resource):
         card = request.get_json()
 
         try: 
+            token = request.headers.get('token') 
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+            username = data['username']
+
             front = card['front']
             back = card['back']
             deck_id = card['deck_id']
             
             #checks if the deck belongs to the current logged in user
             deck = Deck.query.filter_by(id = deck_id).first()
-            if deck.user_id == current_user.id and current_user.is_authenticated:
+            user = User.query.filter_by(username = username).first() 
+            if deck.user_id == user.id:
                 deck = Card(front = front,
                     back = back, 
                     deck_id = deck_id, 
-                    user_id = current_user.id)
+                    user_id = user.id)
                 db.session.add(deck)
                 db.session.commit() 
 
@@ -62,7 +68,7 @@ class allCards(Resource):
 
 
 class singleCard(Resource): 
-    
+    @login_required
     def get(self, cid): 
         """ 
         Gets that specific card, no need for login
@@ -89,14 +95,18 @@ class singleCard(Resource):
         Returns 201 and error if error
         Returns 200 if success"""
 
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+
+        user = User.query.filter_by(username = data['username']).first() 
         card = Card.query.filter_by(id = cid).first() 
 
-        if not card: 
+        if not card or not user: 
             return make_response(jsonify({"error" : "Card doesn't exist"}), 201) 
         
         newCard = request.get_json()
         
-        if not card.user_id == current_user.id: 
+        if not card.user_id == user.id: 
             return make_response(jsonify({"error" : "Please log in"}), 201)
 
         front = card.front
@@ -130,7 +140,11 @@ class singleCard(Resource):
             return make_response(jsonify({"error" : "Card doesn't exist"}), 201) 
         
         #users can't make changes to whichever card they want
-        if not current_user.id == card.user_id or not current_user.is_authenticated: 
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data['username'])
+
+        if not user.id == card.user_id: 
             return make_response(jsonify({"error" : "Please log in"}), 201) 
 
         Card.query.filter_by(id = cid).delete() 
@@ -139,15 +153,19 @@ class singleCard(Resource):
         return 200
         
 class specificCards(Resource): #deck/card/did
-
+    @login_required
     def get(self, did):
         """Returns all the cards of a deck as array 
         201 if unsuccesful
         200 if ok"""
         
         #verifying if the request came from the logged in user for his own decks
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+
+        user = User.query.filter_by(username = data['username']) 
         deck = Deck.query.filter_by(id = did).first() 
-        if not deck or not deck.user_id == current_user.id: 
+        if not deck or not deck.user_id == user.id: 
             return make_response(jsonify({"error" : "Deck doesn't exist or pls log in"}), 201 ) 
 
         cards = Card.query.filter_by(deck_id = did)

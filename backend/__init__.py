@@ -1,25 +1,36 @@
-from flask import Flask, session
-from flask_login import LoginManager 
+from flask import Flask, session, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api 
+from flask_cors import CORS
+from functools import wraps
+import jwt
 
 app = Flask(__name__, instance_relative_config = True) 
 app.config.from_object('backend.config.DefaultConfig')
 app.secret_key = 'secret_key' #secret key for sessions
+CORS(
+    app, 
+    supports_credentials=True
+    ) #to make requests from frontend
 
 api = Api(app) 
 
 db = SQLAlchemy(app) 
 
-login_manager = LoginManager()
-login_manager.init_app(app)
-
 #used to return information from user object later on in the app
 #Will use the userobject.property to verify login later on 
-@login_manager.user_loader 
-def load_user(user_id):
-    return User.query.filter_by(id = int(user_id)).first()
+def login_required(f): 
+    @wraps(f)
+    def decorated(*args, **kwargs): 
+        token = request.headers.get('token') 
 
+        try : 
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+        except: 
+            return jsonify({'msg' : 'Token is missing'})
+
+    return decorated 
+    
 #importing api routes | not necessary, jic
 from backend.flashcards import deckRoutes, cardRoutes, file_management
 from backend.users import userRoutes

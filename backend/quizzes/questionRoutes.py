@@ -1,10 +1,10 @@
-import datetime
-import json
-from backend import api, db 
-from flask_login import current_user
+from backend import api, db, app, login_required
+from backend.authentication.routes import login
 from backend.quizzes.quizModel import Quiz, Question, Option 
 from flask import jsonify, request, make_response
 from flask_restful import Resource
+import jwt 
+from backend.users import User 
 
 class allQuestions(Resource): 
 
@@ -30,12 +30,13 @@ class allQuestions(Resource):
         data = request.get_json() 
         try: 
             quiz = Quiz.query.filter_by(id = data['quiz_id']).first() 
-            
+
         except: 
             return make_response(jsonify({"error" : "Invalid attributes. Provide quiz id"}), 201) 
-        if not current_user.is_authenticated\
-            or not quiz: 
-            return make_response(jsonify({"error" : "Please log in"}), 201) 
+
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
 
         content = '' 
         if 'content' in data.keys(): 
@@ -45,14 +46,14 @@ class allQuestions(Resource):
             marks = data['marks']
 
         ques = Question(content = content, marks = marks, 
-            quiz_id = data['quiz_id'], user_id = current_user.id)
+            quiz_id = data['quiz_id'], user_id = user.id)
         db.session.add(ques)
         
         db.session.commit() 
         return 200 
 
 class singleQuestion(Resource): 
-    
+    @login_required
     def get(self, qid): 
         """ 
         Gets single question, login not required
@@ -77,12 +78,14 @@ class singleQuestion(Resource):
         If doesn't exist or not logged in 201
         Deletes it's options also
         """
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
 
         ques = Question.query.filter_by(id = qid).first() 
 
         if not ques or\
-            ques.user_id != current_user.id or\
-            not current_user.is_authenticated: 
+            ques.user_id != user.id :
             return make_response(jsonify({'error' : 'Do not have permission'}), 201) 
 
         Option.query.filter_by(question_id = qid).delete()
@@ -93,12 +96,15 @@ class singleQuestion(Resource):
     def patch(self, qid): 
         """Updates only the given fields 
         201 if not logged in or no permission or quiz doesn't exist"""
-        
+
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()  
+
         ques =Question.query.filter_by(id  = qid).first() 
 
         if not ques or\
-            ques.user_id != current_user.id or\
-            not current_user.is_authenticated: 
+            ques.user_id != user.id: 
             return make_response(jsonify({'error' : 'Do not have permission'}), 201) 
         
         data = request.get_json() 

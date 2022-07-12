@@ -1,10 +1,11 @@
-import json
+from cmath import log
 from flask import jsonify, request, make_response
 from flask_restful import Resource
 from backend.notes.noteModel import Notebook, Page 
-from flask_login import current_user
-from backend import api, db
+from backend import api, db, login_required, app 
 import datetime 
+import jwt
+from backend.users import User
 
 class allNotes(Resource): 
 
@@ -41,8 +42,9 @@ class allNotes(Resource):
         User must be logged in to post
         200 for ok, 201 for error
         """
-        if not current_user.is_authenticated:
-            return make_response(jsonify({"error" : "Please log in"}))
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
 
         data = request.get_json() 
 
@@ -56,7 +58,7 @@ class allNotes(Resource):
                 description = data['description'] 
             created = datetime.datetime.now() 
             last_seen = created 
-            user_id = current_user.id
+            user_id = user.id
 
             notebook = Notebook(
                 name = name, 
@@ -76,7 +78,8 @@ class allNotes(Resource):
 
 
 class singleNote(Resource): 
-    
+    @login_required
+
     def get(self, nid): 
         """
         Returns specific notebook with id
@@ -104,13 +107,13 @@ class singleNote(Resource):
         Deletes notebook and it's pages
         Checks if user is logged in
         201 if any error (including user not logged in, notebook not found) """
-
-        if not current_user.is_authenticated: 
-            return make_response(jsonify({"error" : "please log in"}), 201) 
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
 
         notebook = Notebook.query.filter_by(id = nid).first() 
 
-        if not notebook.user_id == current_user.id or not notebook: 
+        if not notebook.user_id == user.id or not notebook: 
             return make_response(jsonify({"error" : "Please log in as notebook user"}), 201)
         
         Notebook.query.filter_by(id = nid).delete()
@@ -123,11 +126,13 @@ class singleNote(Resource):
         """Updates notebook without strict key checking
         user should be logged in
         201 if error"""
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
 
         notebook = Notebook.query.filter_by(id = nid ).first() 
 
-        if not current_user.is_authenticated or\
-            not current_user.id == notebook.user_id or\
+        if not user.id == notebook.user_id or\
             not notebook: 
             return make_response(jsonify({"error" : "Please log in"}), 201)
         
@@ -153,11 +158,12 @@ class userNotes(Resource):
         """Returns all teh notebooks for the currently logged in user
         200 if ok
         201 else"""
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
 
         try: 
-            if not current_user.is_authenticated: 
-                return make_response(jsonify({"error" : "please log in"}), 201)
-            notebooks = Notebook.query.filter_by(user_id = current_user.id ) 
+            notebooks = Notebook.query.filter_by(user_id = user.id ) 
             output = [] 
             
             for notebook in notebooks: 

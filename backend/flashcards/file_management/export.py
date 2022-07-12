@@ -1,5 +1,4 @@
-from backend import app, login_manager, api, db 
-from flask_login import login_required, login_user, logout_user, current_user 
+from backend import app, login_required, api, db 
 from backend.flashcards import Card, Deck
 from flask_restful import Resource
 from flask import jsonify, request, make_response, send_from_directory, render_template, send_file
@@ -8,9 +7,11 @@ import TaskManager
 import numpy as np 
 import pandas as pd
 import os
-
+import jwt
+from backend.users import User
 
 class csv(Resource): #flashcards/csv/<did>
+    @login_required
 
     def get(self, did): 
         """
@@ -20,10 +21,12 @@ class csv(Resource): #flashcards/csv/<did>
             1, text, text...
         201 if user isn't logged in or tries to access other deck
         """
-        deck = Deck.query.filter_by(id = did).first() 
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data['username']).first()
 
-        if not current_user.id == deck.user_id or \
-            not current_user.is_authenticated or \
+        deck = Deck.query.filter_by(id = did).first() 
+        if not user.id == deck.user_id or \
             not deck: 
             return make_response(jsonify({"error" : "Invalid credentials"}), 201 )
         
@@ -39,7 +42,7 @@ class csv(Resource): #flashcards/csv/<did>
         res = make_response(df.to_csv(), 200) 
         res.mimetype = "text/plain"
 
-        result = TaskManager.sendCards.delay( did, current_user.id,csv = df.to_csv(), html = None)
+        result = TaskManager.sendCards.delay( did, user.id,csv = df.to_csv(), html = None)
         print(result.status)
 
         return res     
@@ -52,11 +55,13 @@ class html(Resource): #flashcards/html/<did>
         Asynchronously returns a text with html formatting
         Looks like 2 cards stacked beside each other
         201 if user isn't logged in or tries to access other deck"""
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data['username']).first()
 
         deck = Deck.query.filter_by(id = did).first() 
 
-        if not current_user.id == deck.user_id or \
-            not current_user.is_authenticated or \
+        if not user.id == deck.user_id or \
             not deck:
             return make_response(jsonify({"error" : "INvalid credentials"}), 201) 
 
@@ -71,7 +76,7 @@ class html(Resource): #flashcards/html/<did>
         f = open("./backend/templates/demo.html", "w")
         f.write(output_from_parsed_template)
 
-        result = TaskManager.sendCards.delay( did, current_user.id,None, html = output_from_parsed_template)
+        result = TaskManager.sendCards.delay( did, user.id,None, html = output_from_parsed_template)
         print(result.status) 
 
         return make_response(output_from_parsed_template)

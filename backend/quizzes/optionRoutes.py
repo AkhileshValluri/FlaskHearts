@@ -1,16 +1,19 @@
-import datetime
-import json
-from pickletools import markobject
-from backend import api, db 
-from flask_login import current_user
+from backend import api, db, app, login_required
+from backend.authentication.routes import login
 from backend.quizzes.quizModel import Quiz, Question, Option 
 from flask import jsonify, request, make_response
 from flask_restful import Resource
+import jwt 
+from backend.users import User
 
 class allOptions(Resource): 
 
     def get(self): 
-        
+
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
+    
         opts = Option.query.all()
         output = []
         for opt in opts: 
@@ -26,6 +29,9 @@ class allOptions(Resource):
         return make_response(jsonify(output), 200) 
 
     def post(self): 
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
 
         data = request.get_json() 
         try: 
@@ -34,9 +40,7 @@ class allOptions(Resource):
         except Exception as e : 
             print(e)
             return make_response(jsonify({'error' : f'invalid arguments, provide question id'}), 201)
-        if not current_user.is_authenticated\
-            or not question:
-            return make_response(jsonify({'error' : "Don't have permission to do that"}), 201) 
+
 
         content = ''
         if 'content' in data.keys(): 
@@ -50,7 +54,7 @@ class allOptions(Resource):
 
         quiz_id = question.quiz.id
 
-        user_id = current_user.id 
+        user_id = user.id 
 
         opt = Option(content = content, correct = correct, 
             question_id = question_id, quiz_id = quiz_id, user_id = user_id )
@@ -62,7 +66,8 @@ class allOptions(Resource):
         return 200
 
 class singleOption(Resource): 
-
+    @login_required
+    
     def get(self, oid): 
 
         opt = Option.query.filter_by(id = oid).first()
@@ -85,10 +90,6 @@ class singleOption(Resource):
 
         opt = Option.query.filter_by(id = oid).first() 
 
-        if not opt \
-            or current_user.id != opt.user_id: 
-            return make_response(({'error' : "You don't have permission"}), 201)
-        
         data = request.get_json() 
 
         if 'content' in data.keys():
@@ -103,8 +104,12 @@ class singleOption(Resource):
 
     def delete(self, oid): 
 
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
+
         opt = Option.query.filter_by(id = oid).first()  
-        if current_user.is_authenticated and current_user.id == opt.id: 
+        if user.id == opt.id: 
             Option.query.filter_by(id = oid).delete( )
             db.session.commit() 
             return 200 

@@ -1,9 +1,8 @@
-from backend import app, login_manager, api, db 
-from flask_login import login_required, login_user, logout_user, current_user 
+from backend import app, login_required, api, db 
 from backend.users.userModel import User
 from flask_restful import Resource
 from flask import jsonify, request, make_response
-
+import jwt
 
 class allUsers(Resource): 
     
@@ -61,7 +60,7 @@ class allUsers(Resource):
             return make_response(jsonify({"error" : error}), 201) 
 
 class singleUser(Resource): 
-    
+    @login_required
     def get(self, uid): 
         """
         Searches the database for a user with id == uid and returns: 
@@ -94,8 +93,11 @@ class singleUser(Resource):
         All data not provided is autofilled
         If user with uid not found returns 201
         If user not logged in, returns 203"""
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
 
-        if not current_user.is_authenticated or not current_user.id == uid:
+        if not user.id == uid:
             return make_response(jsonify({'error' : 'Please log in '}), 203) 
 
 
@@ -125,7 +127,7 @@ class singleUser(Resource):
         If user not logged in returns 202
         """
 
-        if not current_user.is_authenticated or not current_user.id == uid:
+        if not user.id == uid:
             return make_response(jsonify({'error' : 'Please log in '}), 202) 
 
 

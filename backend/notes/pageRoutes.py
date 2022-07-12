@@ -1,11 +1,11 @@
-import json
 from flask import make_response, request
 from backend.notes.noteModel import Notebook, Page
-from backend import api, db
+from backend import api, db, app, login_required
+import jwt
 import datetime
 from flask_restful import Resource
-from flask_login import current_user
 from flask import jsonify, make_response
+from backend.users import User
 
 class allPages(Resource): 
 
@@ -34,9 +34,9 @@ class allPages(Resource):
     def post(self): 
         """Checks if current user is logged in and posts the page in his name
         Returns 201 if error as "error" : " <insert error here> " """
-
-        if not current_user.is_authenticated: 
-            return make_response(jsonify({"error" : "please log in"}), 201) 
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
         
         data = request.get_json()
         if not 'notebook_id' in data.keys(): 
@@ -50,7 +50,7 @@ class allPages(Resource):
         content = ''
         if 'content' in data.keys(): 
             content = data['content'] 
-        user_id = current_user.id
+        user_id = user.id
 
         page = Page(content = content, notebook_id = notebook_id, user_id = user_id) 
         db.session.add(page) 
@@ -59,6 +59,7 @@ class allPages(Resource):
         return make_response(jsonify({"id" : page.id}), 200) 
 
 class singlePage(Resource): 
+    @login_required 
 
     def get(self, pid): 
         """Returns specific page with id=pid in the format: 
@@ -85,11 +86,14 @@ class singlePage(Resource):
         """Deletes page with id = pid
         Checks if user is logged in"""
 
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
+
         page = Page.query.filter_by(id = pid).first() 
         
-        if not current_user.is_authenticated\
-            or not page\
-            or current_user.id != page.user_id: 
+        if  not page\
+            or user.id != page.user_id: 
             return make_response(jsonify({'error' : 'You do not have permssion'}), 201) 
         
         Page.query.filter_by(id = pid).delete() 
@@ -102,11 +106,13 @@ class singlePage(Resource):
         Updates last seen on notebook
         Checks if user is logged in
         200 - OK | 201 - error"""
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data.username).first()
 
         data = request.get_json()   
         page = Page.query.filter_by(id = pid).first() 
-        if not current_user.is_authenticated \
-            or current_user.id != page.user_id:
+        if user.id != page.user_id:
             return make_response(jsonify({'error' : 'You do not have permission'}), 201) 
         
         if 'content' in data.keys(): 
