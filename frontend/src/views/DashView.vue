@@ -4,6 +4,8 @@
         <p class="lead">This is the dashboard. Your activity is saved by us and analysed.</p>
         <hr class="my-4">
         <p>You will be able to view your statistics here</p>
+        <br>
+        <p> We will also mail them to you at : {{usr.email}}</p>
 
     </div>
 </template>

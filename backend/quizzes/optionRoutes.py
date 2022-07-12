@@ -12,7 +12,7 @@ class allOptions(Resource):
 
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()
+        user = User.query.filter_by(username = data['username']).first()
     
         opts = Option.query.all()
         output = []
@@ -31,7 +31,7 @@ class allOptions(Resource):
     def post(self): 
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()
+        user = User.query.filter_by(username = data['username']).first()
 
         data = request.get_json() 
         try: 
@@ -106,7 +106,7 @@ class singleOption(Resource):
 
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()
+        user = User.query.filter_by(username = data['username']).first()
 
         opt = Option.query.filter_by(id = oid).first()  
         if user.id == opt.id: 

@@ -18,10 +18,15 @@ class login(Resource):
         print(auth) 
         
         user = User.query.filter_by(username = auth.username).first() 
-    
+        userObj = {
+            'id': user.id, 
+            'username' : user.username, 
+            'phone_number' : user.phone_number, 
+            'email' : user.email
+        }
         if auth and user and user.password ==  auth.password: #if the user exists and password matches
             token = jwt.encode({'username' : auth.username, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
-            return jsonify({'token' : token.decode('UTF-8')})
+            return jsonify({'token' : token.decode('UTF-8'), 'usr' : userObj})
         else:   
             return make_response('could not verify', 401, {'WWW-Authenticate': 'Basic realm="Login required"'})
 

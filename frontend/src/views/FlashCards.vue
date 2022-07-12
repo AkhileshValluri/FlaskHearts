@@ -1,20 +1,27 @@
 <template>
-    <!-- <div v-for="deck in this.$store.decks">
-        {{ deck.name }}
-        {{ this.$store.decks }}
-        <div class="card" style="width: 18rem;">
+    <div v-for="(deck, index) in this.decks" v-bind:key="deck.id">
+        <div class="card mx-5" style="width: 18rem;">
             <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
-                    card's content.</p>
-                <a href="#" class="card-link">Card link</a>
-                <a href="#" class="card-link">Another link</a>
+                <h3 class="card-title">{{ deck.name }}</h3>
+                <h6 class="card-subtitle mb-2 text-muted">Score : {{ deck.deck_score ? 0 : deck.deck_score }}</h6>
+                <p class="card-text" v-on:mouseover="this.showOptions[index] = true"
+                    v-on:mouseleave="this.showOptions[index] = false" style="">{{ deck.description }}
+                <ul class="list-group" v-show="this.showOptions[index]">
+                    <li class="list-group-item">
+                        <button type="button" class="btn btn-outline-success">View</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button type="button" class="btn btn-outline-primary">Edit</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button type="button" class="btn btn-outline-danger">Delete</button>
+                    </li>
+                </ul>
+                </p>
             </div>
         </div>
-    </div> -->
-    <button v-on:click="showme">click me</button>
-    {{ this.$store.state.deck.decks }}
+    </div>
+
 </template>
 
 <script>
@@ -22,17 +29,24 @@ import { mapActions } from 'vuex'
 import { mapGetters } from 'vuex'
 export default {
     name: 'FlashCards',
+    data() {
+        return {
+            decks: [],
+            showOptions: [],
+        }
+    },
     methods: {
         ...mapActions({
-            AllDecks: 'AllDecks',
-            DeleteDeck: 'DeleteDeck',
-            AddDeck: 'AddDeck',
-            UpdateDeck: 'UpdateDeck'
+            GetDecks: 'GetDecks',
         }),
-        showme() {
-            this.AllDecks()
-            console.log(this.getDecks)
+        toggleOptions() {
+            this.showOptions = true;
         }
+    },
+    mounted() {
+        this.GetDecks()
+        this.decks = this.getDecks
+        for (let i = 0; i < this.decks.length; i++) this.showOptions.push(false)
     },
     computed: {
         ...mapGetters({ getDecks: 'getDecks' })

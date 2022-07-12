@@ -36,7 +36,7 @@ class allPages(Resource):
         Returns 201 if error as "error" : " <insert error here> " """
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()
+        user = User.query.filter_by(username = data['username']).first()
         
         data = request.get_json()
         if not 'notebook_id' in data.keys(): 
@@ -88,7 +88,7 @@ class singlePage(Resource):
 
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()
+        user = User.query.filter_by(username = data['username']).first()
 
         page = Page.query.filter_by(id = pid).first() 
         
@@ -108,7 +108,7 @@ class singlePage(Resource):
         200 - OK | 201 - error"""
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()
+        user = User.query.filter_by(username = data['username']).first()
 
         data = request.get_json()   
         page = Page.query.filter_by(id = pid).first() 

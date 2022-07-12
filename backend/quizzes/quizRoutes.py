@@ -37,7 +37,7 @@ class allQuizzes(Resource):
         201 if name not given or not logged in """
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()
+        user = User.query.filter_by(username = data['username']).first()
 
         data = request.get_json()
         try : 
@@ -102,7 +102,7 @@ class singleQuiz(Resource):
         201 if quiz doesn't exist or not logged in """
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()
+        user = User.query.filter_by(username = data['username']).first()
 
         quiz = Quiz.query.filter_by(id = qid).first()
 
@@ -126,7 +126,7 @@ class singleQuiz(Resource):
         quiz = Quiz.query.filter_by(id = qid).first() 
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()
+        user = User.query.filter_by(username = data['username']).first()
 
         if not quiz or\
             quiz.user_id != user.id:

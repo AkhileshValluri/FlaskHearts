@@ -3,10 +3,6 @@ const axios = require('axios')
 const axiosInstance = axios.create({
     baseURL: 'http://localhost:5000/',
     withCredentials: true,
-    headers: {
-        Accept: 'application/json',
-
-    }
 })
 
 const authentication = {
@@ -16,7 +12,8 @@ const authentication = {
         phone_number: null,
         email: null,
         login_error: null,
-        id: null
+        id: null,
+        token: '',
     },
 
     getters: {
@@ -30,7 +27,9 @@ const authentication = {
             }
             return userObj
         },
-
+        getToken: (state) => {
+            return state.token
+        }
     },
 
     mutations: {
@@ -41,6 +40,11 @@ const authentication = {
         },
         updateError(state, payload) {
             state.login_error = payload
+        },
+        updateToken(state, payload) {
+            state.token = payload
+            document.cookie = payload
+            console.log(document.cookie) 
         }
     },
 
@@ -48,17 +52,20 @@ const authentication = {
 
         async signIn(context, form_data) {
             console.log(form_data)
-            let res = await axiosInstance.post('login', form_data)
-            if (res.status === 200) {
-                console.log(res.headers['Content-Type'])
-                // console.log(document.cookie) //checking if cookie added
-                let uid = res.data.uid
-                let resGet = await axiosInstance.get('user/' + uid)
 
-                if (resGet.status === 200) {
-                    context.commit('updateUserDetails', resGet.data)
+            let res = await axiosInstance.get('login', {
+                auth: {
+                    'username': form_data.username,
+                    'password': form_data.password
                 }
-                else console.log(resGet.data)
+            })
+            if (res.status === 200) {
+                // console.log(res.data)
+
+                context.commit('updateToken', res.data.token)
+                context.commit('updateUserDetails', res.data.usr)
+
+
             }
             else console.log(resGet.data)
         },
@@ -72,10 +79,12 @@ const authentication = {
             }
 
             let res = await axiosInstance.post('user', postObj)
-
-            console.log(res.data)
+            context.commit('updateToken', res.token)
+            // console.log(res.data)
             if (res.status !== 200) {
                 context.commit('updateError', res.data.msg)
+            } else {
+                context.commit('updateError', 'User registered. Log in')
             }
         },
 

@@ -1,6 +1,7 @@
 import { createStore } from 'vuex'
 
 import authentication from '@/store/authentication'
+import deck from '@/store/deck'
 
 export default createStore({
   state: {
@@ -12,6 +13,7 @@ export default createStore({
   actions: {
   },
   modules: {
-    authentication: authentication
+    authentication: authentication,
+    deck: deck
   }
 })

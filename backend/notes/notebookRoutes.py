@@ -44,7 +44,7 @@ class allNotes(Resource):
         """
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()
+        user = User.query.filter_by(username = data['username']).first()
 
         data = request.get_json() 
 
@@ -128,7 +128,7 @@ class singleNote(Resource):
         201 if error"""
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()
+        user = User.query.filter_by(username = data['username']).first()
 
         notebook = Notebook.query.filter_by(id = nid ).first() 
 
@@ -160,7 +160,7 @@ class userNotes(Resource):
         201 else"""
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()
+        user = User.query.filter_by(username = data['username']).first()
 
         try: 
             notebooks = Notebook.query.filter_by(user_id = user.id ) 

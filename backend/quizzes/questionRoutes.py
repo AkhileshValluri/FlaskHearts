@@ -27,6 +27,10 @@ class allQuestions(Resource):
     def post(self) : 
         """Checks for attributes from request, all others set to default
         Returns 201 if user not logged in or quiz_id not given"""
+        token = request.headers.get('token') 
+        data = jwt.decode(token, app.config['SECRET_KEY'])
+        user = User.query.filter_by(username = data['username']).first()
+
         data = request.get_json() 
         try: 
             quiz = Quiz.query.filter_by(id = data['quiz_id']).first() 
@@ -34,9 +38,6 @@ class allQuestions(Resource):
         except: 
             return make_response(jsonify({"error" : "Invalid attributes. Provide quiz id"}), 201) 
 
-        token = request.headers.get('token') 
-        data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()
 
         content = '' 
         if 'content' in data.keys(): 
@@ -80,7 +81,7 @@ class singleQuestion(Resource):
         """
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()
+        user = User.query.filter_by(username = data['username']).first()
 
         ques = Question.query.filter_by(id = qid).first() 
 
@@ -99,7 +100,7 @@ class singleQuestion(Resource):
 
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data.username).first()  
+        user = User.query.filter_by(username = data['username']).first()  
 
         ques =Question.query.filter_by(id  = qid).first() 
 
