@@ -45,14 +45,23 @@ const authentication = {
             state.token = payload
             document.cookie = payload
             console.log(document.cookie) 
+        },
+        deleteAllCookies() {
+            var cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i];
+                let eqPos = cookie.indexOf('=');
+                let name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                document.cookie = name + '-;expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            }
         }
     },
 
     actions: {
 
         async signIn(context, form_data) {
+            context.commit('deleteAllCookies')
             console.log(form_data)
-
             let res = await axiosInstance.get('login', {
                 auth: {
                     'username': form_data.username,
@@ -71,6 +80,7 @@ const authentication = {
         },
 
         async signUp(context, form_data) {
+            context.commit('deleteAllCookies') 
             let postObj = {
                 'username': form_data.username,
                 'password': form_data.password,
@@ -89,6 +99,7 @@ const authentication = {
         },
 
         async logout(context) {
+            context.commit('deleteAllCookies')
             let res = await axiosInstance.post('logout')
             console.log(res.data)
         }
