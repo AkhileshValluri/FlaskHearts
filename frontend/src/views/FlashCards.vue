@@ -94,7 +94,7 @@ export default {
 
 .column {
   float: left;
-  width: 50%;
+width: 33%;
   padding: 0 10px;
 }
 
