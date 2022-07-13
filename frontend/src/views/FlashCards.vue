@@ -36,10 +36,9 @@
             </div>
             <br>
         </div>
-        <br>
-        <div>
-            <AddDeck></AddDeck>
-        </div>
+
+        <AddDeck></AddDeck>
+
     </div>
 
 </template>

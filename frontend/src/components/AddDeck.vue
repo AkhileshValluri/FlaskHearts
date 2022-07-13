@@ -1,4 +1,5 @@
 <template>
+
     <div class="card mx-5" style="width: 18rem; background-color:whitesmoke;">
         <div class="card-body">
             <h3 class="card-title"> Add</h3>
@@ -31,6 +32,7 @@
             </p>
         </div>
     </div>
+
 </template>
 
 <script>
