@@ -5,7 +5,7 @@ const axiosInstance = axios.create({
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
-        'token': document.cookie.split(';')[0]
+        'token': document.cookie.split(';')[1]
     }
 })
 

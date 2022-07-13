@@ -31,7 +31,7 @@ class imp(Resource): #/flashcards/import
 
         if not filename.split('.')[1] in ['csv', 'txt'] or not f: 
             return make_response(jsonify({"msg" : "File type is not correct"}))
-
+        print('here')
         result = TaskManager.addCards.delay(filename, user.id)
         print(result.status)
         return make_response(jsonify({"msg" : "Processing file currently"}), 200 )

@@ -89,8 +89,8 @@ const authentication = {
             }
 
             let res = await axiosInstance.post('user', postObj)
-            context.commit('updateToken', res.token)
-            // console.log(res.data)
+            // context.commit('updateToken', res.token)
+            console.log(res.data)
             if (res.status !== 200) {
                 context.commit('updateError', res.data.msg)
             } else {

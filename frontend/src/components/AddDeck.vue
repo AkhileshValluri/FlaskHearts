@@ -61,15 +61,17 @@ export default {
             })
         },
         uploadFile: (event) => {
+            console.log('Uploading File ')
             let formData = new FormData()
             const fileo = event.target.files[0]
             formData.append('file', fileo)
             axios.post('http://localhost:5000/flashcards/import', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    'token': document.cookie
+                    'token': document.cookie.split(';')[1]
                 }
             })
+                .then(res => console.log(res.data))
         }
     },
 }

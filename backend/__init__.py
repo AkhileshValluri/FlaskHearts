@@ -28,7 +28,7 @@ def login_required(f):
             data = jwt.decode(token, app.config['SECRET_KEY'])
         except: 
             return jsonify({'msg' : 'Token is missing'})
-
+        return f(*args, **kwargs) 
     return decorated 
     
 #importing api routes | not necessary, jic

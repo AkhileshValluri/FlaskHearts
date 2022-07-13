@@ -52,7 +52,7 @@ class allDecks(Resource):
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
         user = User.query.filter_by(username = data['username']).first()
-
+        print(data)
         deck = request.get_json() 
 
         try: 
