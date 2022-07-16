@@ -3,15 +3,18 @@
   <div id="viewele">
     <router-view> </router-view>
   </div>
+  <ErrorMessage></ErrorMessage>
 </template>
 
 <script>
 import NavBar from '@/components/NavBar.vue'
+import ErrorMessage from '@/components/ErrorMessage.vue'
 
 export default {
   name: "App",
   components: {
-    NavBar
+    NavBar,
+    ErrorMessage
   }
 } 
 </script>

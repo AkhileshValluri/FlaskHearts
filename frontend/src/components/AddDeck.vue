@@ -1,35 +1,36 @@
 <template>
-
-    <div class="card mx-5" style="width: 18rem; background-color:whitesmoke;">
-        <div class="card-body">
-            <h3 class="card-title"> Add</h3>
-            <p class="card-text">
-            <div class="input-group input-group-sm mb-3">
-                <div style="width:100%">
-                    <input type="text" class="form-control" placeholder="Name" aria-describedby="basic-addon1"
-                        v-model="deckName" style="text-align:center">
-                </div>
-                <br>
-
-                <br>
-                <div style="width:100%">
-                    <textarea class="form-control" placeholder="Description" aria-label="Description"
-                        v-model="deckDescription" style="text-align:center"></textarea>
-                </div>
-                <div style="margin-top:1rem;  margin-left:40%">
-                    <input type="color" class="form-control form-control-color" id="exampleColorInput"
-                        title="Choose your color" v-model="deckColour">
-                </div>
-                <div>
+    <div style="display:block">
+        <div class="card mx-5" style="width: 33%; background-color:whitesmoke;">
+            <div class="card-body">
+                <h3 class="card-title"> Add</h3>
+                <p class="card-text">
+                <div class="input-group input-group-sm mb-3">
+                    <div style="width:100%">
+                        <input type="text" class="form-control" placeholder="Name" aria-describedby="basic-addon1"
+                            v-model="deckName" style="text-align:center">
+                    </div>
                     <br>
-                    Import using CSV
-                    <form id="uploadForm" enctype="multipart/form-data" v-on:change="uploadFile">
-                        <input class='form-control' type="file" id="file" name="file">
-                    </form>
-                    <button type="button" class="btn btn-outline-success" v-on:click="onSubmit()">Add</button>
+
+                    <br>
+                    <div style="width:100%">
+                        <textarea class="form-control" placeholder="Description" aria-label="Description"
+                            v-model="deckDescription" style="text-align:center"></textarea>
+                    </div>
+                    <div style="margin-top:1rem;  margin-left:40%">
+                        <input type="color" class="form-control form-control-color" id="exampleColorInput"
+                            title="Choose your color" v-model="deckColour">
+                    </div>
+                    <div>
+                        <br>
+                        Import using CSV
+                        <form id="uploadForm" enctype="multipart/form-data" v-on:change="uploadFile">
+                            <input class='form-control' type="file" id="file" name="file">
+                        </form>
+                        <button type="button" class="btn btn-outline-success" v-on:click="onSubmit()">Add</button>
+                    </div>
                 </div>
+                </p>
             </div>
-            </p>
         </div>
     </div>
 

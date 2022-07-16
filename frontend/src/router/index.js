@@ -4,8 +4,8 @@ import HomeView from '@/views/HomeView'
 import FlashCards from '@/views/FlashCards'
 import DashView from '@/views/DashView'
 import LoginView from '@/views/LoginView'
-import NotesView from '@/views/NotesView'
-import QuizzesView from '@/views/QuizzesView'
+import CardView from '@/views/CardView'
+
 const routes = [
 
   // {
@@ -34,19 +34,14 @@ const routes = [
     component: FlashCards
   },
   {
-    path: '/notes',
-    name: 'Notes',
-    component: NotesView
-  },
-  {
-    path: '/quizzes',
-    name: 'Quizzes',
-    component: QuizzesView
-  },
-  {
     path: '/login',
     name: 'Login',
     component: LoginView
+  },
+  {
+    path: '/card/:did',
+    name: 'Card',
+    component: CardView
   }
 ]
 

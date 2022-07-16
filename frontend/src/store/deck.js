@@ -5,7 +5,7 @@ const axiosInstance = axios.create({
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
-        'token': document.cookie.split(';')[1]
+        'token': document.cookie.split(';').length > 1 ? document.cookie.split(';')[1] : document.cookie.split(';')[0]
     }
 })
 
@@ -54,13 +54,20 @@ const deck = {
 
     actions: {
         async GetDecks(context) {
-            console.log(document.cookie)
-            let res = await axiosInstance.get('user/deck')
-            if (res.status === 200) {
-                context.commit('setDecks', res.data)
-                console.log(res.data)
-            } else {
-                console.log('Error' + res.data)
+            console.log(document.cookie.split(';').length > 1 ? document.cookie.split(';')[1] : document.cookie.split(';')[0])
+            try {
+                let res = await axiosInstance.get('user/deck')
+                if (res.status === 200) {
+                    context.commit('setDecks', res.data)
+                    console.log(res.data)
+                } else {
+                    console.log('Error' + res.data)
+                }
+            }
+            catch (err) {
+                console.log(err);
+                let error = 'Session Timed-Out. Please log in again'
+                context.commit('setError', error)
             }
         },
 

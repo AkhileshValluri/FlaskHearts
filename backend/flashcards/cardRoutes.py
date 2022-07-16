@@ -142,7 +142,7 @@ class singleCard(Resource):
         #users can't make changes to whichever card they want
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
-        user = User.query.filter_by(username = data['username'])
+        user = User.query.filter_by(username = data['username']).first() 
 
         if not user.id == card.user_id: 
             return make_response(jsonify({"error" : "Please log in"}), 201) 
@@ -163,7 +163,7 @@ class specificCards(Resource): #deck/card/did
         token = request.headers.get('token') 
         data = jwt.decode(token, app.config['SECRET_KEY'])
 
-        user = User.query.filter_by(username = data['username']) 
+        user = User.query.filter_by(username = data['username']).first()  
         deck = Deck.query.filter_by(id = did).first() 
         if not deck or not deck.user_id == user.id: 
             return make_response(jsonify({"error" : "Deck doesn't exist or pls log in"}), 201 ) 

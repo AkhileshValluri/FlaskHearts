@@ -41,12 +41,11 @@
             </div>
             <input type="password" class="form-control " id="login" placeholder="Enter password" v-model="password"
                 v-show="!newUser" />
-            <button class="btn btn-outline-success" type="button" v-on:click="onSubmit"> Continue </button>
+            <button class="btn btn-outline-success" type="button" v-on:click="onSubmit">
+                <router-link to="/" style="text-decoration:none; color:black">Continue </router-link>
+            </button>
 
             </p>
-        </div>
-        <div class="alert alert-warning" role="alert" v-show="this.$store.state.loginError">
-            {{this.$store.state.login_error}}
         </div>
     </div>
 </template>
@@ -74,14 +73,17 @@ export default {
         }),
         ...mapMutations({
             updateDetails: 'updateUserDetails',
-            changeError: 'updateError'
+            changeError: 'setError'
         }),
         toggleSeen(val) {
             this.newUser = val
         },
         onSubmit() {
             if (this.newUser) {
-                if (this.password === this.confirmPassword && this.email && this.phoneNumber && this.username) {
+                if (this.password === this.confirmPassword && this.email && this.phoneNumber && this.username && this.phoneNumber.length === 10) {
+                    this.email = this.email.trim() + '@gmail.com';
+                    this.phoneNumber = this.phoneNumber.trim();
+                    this.username = this.username.trim()
                     let userObj = {
                         'username': this.username,
                         'phone_number': this.phoneNumber,
@@ -92,7 +94,7 @@ export default {
                     this.signUp(userObj)
                 }
                 else {
-                    error = 'Please fill the fields properly'
+                    let error = 'Please fill the fields properly'
                     this.changeError(error)
                 }
             } else {

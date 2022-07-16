@@ -12,9 +12,3 @@ class User(db.Model, UserMixin):
 
     decks = db.relationship('Deck', backref = 'user', lazy = True) 
     cards = db.relationship('Card', backref = 'user', lazy = True) 
-    notebook = db.relationship('Notebook', backref = 'user', lazy = True) 
-    page = db.relationship('Page', backref = 'user', lazy = True )
-    quiz = db.relationship('Quiz', backref = 'user', lazy = True) 
-    question = db.relationship('Question', backref = 'user', lazy = True) 
-    option = db.relationship('Option', backref = 'user', lazy = True) 
-    

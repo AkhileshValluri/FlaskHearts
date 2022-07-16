@@ -4,16 +4,25 @@
 
         <div v-for="(deck, index) in this.$store.state.deck.decks" v-bind:key="deck.id" class='column'>
 
-            <div class="card mx-5 " style="width:rem; background-color: whitesmoke">
+            <div class="card mx-5 " style="width:100%; background-color: whitesmoke">
                 <div class="card-body" style="background-colour:{{deck.colour}}">
                     <h3 class="card-title">{{ deck.name }}</h3>
                     <h6 class="card-subtitle mb-2 text-muted">Score : {{ deck.deck_score ? deck.deck_score : 0 }}</h6>
+                    <span>
+                        <button type="button" class="btn btn-outline-success btn-lg" v-on:click="" style="width:100%">
+                            View
+                        </button>
+
+                    </span>
                     <p class="card-text" v-on:mouseover="this.showOptions[index] = true"
                         v-on:mouseleave="this.showOptions[index] = false" style="">{{ deck.description }}
                     <ul class="list-group" v-show="this.showOptions[index]">
                         <li class="list-group-item d-grid gap-2">
-                            <button type="button" class="btn btn-outline-success" v-on:click="">
-                                View
+                            <button class="btn btn-outline-success ">
+                                <router-link v-bind:to="{ name : 'Card', params : {did : deck.id}}"
+                                    style="text-decoration:none; color:green; width:100%">
+                                    Review
+                                </router-link>
                             </button>
                         </li>
                         <li class="list-group-item d-grid gap-2">
@@ -54,7 +63,7 @@ export default {
     data() {
         return {
             showOptions: [],
-            showEdit: false
+            showEdit: false,
         }
     },
     methods: {
@@ -87,8 +96,10 @@ export default {
 </script>
 
 <style scoped = true>
+
 * {
   box-sizing: border-box;
+
 }
 
 .column {

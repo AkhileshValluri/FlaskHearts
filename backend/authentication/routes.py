@@ -1,3 +1,4 @@
+from attr import Attribute
 from backend import api, app, login_required
 from backend.users.userModel import User 
 from flask import jsonify, request, make_response
@@ -18,12 +19,15 @@ class login(Resource):
         print(auth) 
         
         user = User.query.filter_by(username = auth.username).first() 
-        userObj = {
-            'id': user.id, 
-            'username' : user.username, 
-            'phone_number' : user.phone_number, 
-            'email' : user.email
-        }
+        try:
+            userObj = {
+                'id': user.id, 
+                'username' : user.username, 
+                'phone_number' : user.phone_number, 
+                'email' : user.email
+            }
+        except AttributeError: 
+            return make_response(jsonify({"error" : "User doesn't exist"}), 404)
         if auth and user and user.password ==  auth.password: #if the user exists and password matches
             token = jwt.encode({'username' : auth.username, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
             return jsonify({'token' : token.decode('UTF-8'), 'usr' : userObj})

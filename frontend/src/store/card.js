@@ -5,7 +5,7 @@ const axiosInstance = axios.create({
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
-        'token': document.cookie.split(';')[0]
+        'token': document.cookie.split(';').length > 1 ? document.cookie.split(';')[1] : document.cookie.split(';')[0]
     }
 })
 
@@ -59,5 +59,47 @@ const card = {
             }
         },
 
+        async DeleteCard(context, cid) {
+            console.log('Deleting card : ', cid)
+            let res = await axiosInstance.delete('card/' + cid)
+            if (res.status === 200) {
+                context.commit('deleteCard', cid)
+                console.log(res.data)
+            } else {
+                console.log('Error : ', res.data)
+            }
+        },
+
+        async UpdateCard(context, { id, payload }) {
+            console.log('Updating deck : ', id, 'to', payload)
+            let res = await axiosInstance.patch('card/' + id, payload)
+            if (res.status === 200) {
+                context.commit('updateCard', { id: id, payload: payload })
+            } else {
+                console.log(res.data)
+            }
+        },
+
+        async AddCard(context, formData) {
+            console.log(formData)
+            let res = await axiosInstance.post('card',
+                {
+                    'front': formData.front,
+                    'back': formData.back,
+                    'deck_id': formData.deck_id
+                })
+            if (res.status === 200) {
+                console.log(res.data)
+                let resGet = await axiosInstance.get('card/' + res.data.cid)
+                if (resGet.status === 200) {
+                    context.commit('addCard', resGet.data)
+                } else {
+                    console.log(resGet.data)
+                }
+            } else {
+                console.log(res.data)
+            }
+        }
     }
 }
+export default card

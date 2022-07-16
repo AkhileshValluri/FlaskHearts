@@ -62,21 +62,22 @@ const authentication = {
         async signIn(context, form_data) {
             context.commit('deleteAllCookies')
             console.log(form_data)
-            let res = await axiosInstance.get('login', {
-                auth: {
-                    'username': form_data.username,
-                    'password': form_data.password
-                }
-            })
-            if (res.status === 200) {
-                // console.log(res.data)
-
+            try {
+                let res = await axiosInstance.get('login', {
+                    auth: {
+                        'username': form_data.username,
+                        'password': form_data.password
+                    }
+                })
                 context.commit('updateToken', res.data.token)
                 context.commit('updateUserDetails', res.data.usr)
-
-
             }
-            else console.log(resGet.data)
+            catch (err) {
+                let error = 'Please check the username and password'
+                context.commit('setError', error)
+                // console.log('Error set')
+            }
+
         },
 
         async signUp(context, form_data) {

@@ -16,24 +16,20 @@
                         <router-link class="nav-link active" aria-current="page" to="/dashboard">Dashboard</router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link class="nav-link" to="/flashcards">FlashCards</router-link>
+                        <router-link class="nav-link" to="/flashcards">Deck</router-link>
                     </li>
-                    <li class="nav-item">
-                        <router-link class="nav-link" to="/notes">Notes</router-link>
-                    </li>
-                    <li class="nav-item">
-                        <router-link class="nav-link  " to="/quizzes">Quizzes</router-link>
-                    </li>
-
                 </ul>
 
             </div>
             <div>
-                <span class="navbar-text" style="justify-content:center;" v-show="!this.authenticated">
+                <span class="navbar-text" style="justify-content:center;"
+                    v-show="!this.$store.state.authentication.token">
                     <router-link class="nav-link " to="/login">Login</router-link>
                 </span>
-                <span class="navbar-text" style="justify-content:center;" v-show="this.authenticated">
+                <span class="navbar-text" style="justify-content:center;"
+                    v-show="this.$store.state.authentication.token">
                     <router-link class="nav-link " to="/">Exit </router-link>
+
                 </span>
             </div>
         </div>
@@ -41,12 +37,9 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+
 export default {
     name: 'NavBar',
-    computed: {
-        ...mapState(['authenticated', 'name', 'rep', 'number', 'email', 'error'])
-    }
 }
 </script>
 
