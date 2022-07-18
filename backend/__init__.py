@@ -10,7 +10,9 @@ app.config.from_object('backend.config.DefaultConfig')
 app.secret_key = 'secret_key' #secret key for sessions
 CORS(
     app, 
-    supports_credentials=True
+    supports_credentials=True, 
+    allow_headers='*', 
+
     ) #to make requests from frontend
 
 api = Api(app) 

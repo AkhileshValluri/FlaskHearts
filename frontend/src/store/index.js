@@ -3,6 +3,7 @@ import { createStore } from 'vuex'
 import authentication from '@/store/authentication'
 import deck from '@/store/deck'
 import card from '@/store/card'
+import view from '@/store/view'
 
 export default createStore({
   state: {
@@ -30,6 +31,7 @@ export default createStore({
   modules: {
     authentication: authentication,
     deck: deck,
-    card: card
+    card: card,
+    view: view,
   }
 })

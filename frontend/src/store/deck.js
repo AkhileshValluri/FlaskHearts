@@ -32,6 +32,7 @@ const deck = {
         setDecks(state, payload) {
             state.decks = []
             state.decks = payload
+            console.log(state.decks)
         },
         addDecks(state, payload) {
             if (state.decks.find(deck => deck.id === payload.id)) return
@@ -42,11 +43,21 @@ const deck = {
                 return !(deck.id === id)
             })
         },
-        updateDeck(state, { payload, id }) {
-            let modDeck = state.decks.find(deck => deck.id === id)
-            state.decks = state.decks.filter(deck => deck.id !== id)
+        updateDeck(state, data) {
+            let modDeck = state.decks.find(deck => deck.id === data.id)
+            state.decks = state.decks.filter(deck => !(deck.id === data.id))
+            let payload = data.payload;
+            if (payload.name) 
             modDeck.name = payload.name
+            if (payload.description) 
             modDeck.description = payload.description
+            try {
+                if (payload.score)
+                    modDeck.score = payload.score
+            }
+            catch (TypeError) {
+                console.log(modDeck)
+            }
             state.decks.push(modDeck)
         }
 
@@ -59,7 +70,6 @@ const deck = {
                 let res = await axiosInstance.get('user/deck')
                 if (res.status === 200) {
                     context.commit('setDecks', res.data)
-                    console.log(res.data)
                 } else {
                     console.log('Error' + res.data)
                 }
@@ -86,7 +96,7 @@ const deck = {
             console.log('Updating deck : ', id, 'to', payload)
             let res = await axiosInstance.patch('deck/' + id, payload)
             if (res.status === 200) {
-                context.commit('updateDeck', { id: id, payload: payload })
+                context.commit('updateDeck', { id, payload })
             } else {
                 console.log(res.data)
             }

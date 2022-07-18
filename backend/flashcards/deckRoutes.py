@@ -104,7 +104,7 @@ class singleDeck(Resource):
             "id" : deck.id, 
             "name" : deck.name, 
             "colour" : deck.colour, 
-            "score" : deck.score, 
+            "score" : deck.score if deck.score else 1, 
             "description" : deck.description, 
             "created" : deck.created, 
             "last_seen" : deck.last_seen, 
@@ -120,7 +120,7 @@ class singleDeck(Resource):
 
         oldDeck = Deck.query.filter_by(id = did).first()
         changes = request.get_json() 
-
+        print(changes) 
         name = oldDeck.name
         colour = oldDeck.colour
         description = oldDeck.description
@@ -138,7 +138,7 @@ class singleDeck(Resource):
         
         if 'score' in changes.keys(): 
             score = changes['score']
-        
+            
         oldDeck.name = name
         oldDeck.colour = colour
         oldDeck.description = description
@@ -184,7 +184,7 @@ class specificDecks(Resource): #user/deck
             "id" : deck.id, 
             "name" : deck.name, 
             "colour" : deck.colour, 
-            "score" : deck.score, 
+            "score" : deck.score if deck.score else 1, 
             "description" : deck.description, 
             "created" : deck.created, 
             "last_seen" : deck.last_seen, 

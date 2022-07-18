@@ -5,6 +5,7 @@ import FlashCards from '@/views/FlashCards'
 import DashView from '@/views/DashView'
 import LoginView from '@/views/LoginView'
 import CardView from '@/views/CardView'
+import DeckView from '@/views/DeckView'
 
 const routes = [
 
@@ -42,6 +43,11 @@ const routes = [
     path: '/card/:did',
     name: 'Card',
     component: CardView
+  },
+  {
+    path: '/deck/:did',
+    name: 'Deck',
+    component: DeckView
   }
 ]
 

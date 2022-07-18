@@ -3,14 +3,16 @@
 
 
         <div v-for="(deck, index) in this.$store.state.deck.decks" v-bind:key="deck.id" class='column'>
-
             <div class="card mx-5 " style="width:100%; background-color: whitesmoke">
                 <div class="card-body" style="background-colour:{{deck.colour}}">
                     <h3 class="card-title">{{ deck.name }}</h3>
-                    <h6 class="card-subtitle mb-2 text-muted">Score : {{ deck.deck_score ? deck.deck_score : 0 }}</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">Score : {{ deck.score}}</h6>
                     <span>
                         <button type="button" class="btn btn-outline-success btn-lg" v-on:click="" style="width:100%">
-                            View
+                            <router-link v-bind:to="{ name : 'Deck', params : {did : deck.id}}"
+                                style="text-decoration:none; color:black">
+                                Practice
+                            </router-link>
                         </button>
 
                     </span>
@@ -21,7 +23,7 @@
                             <button class="btn btn-outline-success ">
                                 <router-link v-bind:to="{ name : 'Card', params : {did : deck.id}}"
                                     style="text-decoration:none; color:green; width:100%">
-                                    Review
+                                    View
                                 </router-link>
                             </button>
                         </li>
