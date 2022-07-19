@@ -9,7 +9,7 @@
         <div>
             <button type="button" class="btn btn-outline-info" @click="nextClick()" v-show="!showSubmit">Next</button>
             <button type="button" class="btn btn-outline-success" @click="submit()" v-show="showSubmit">
-                <a href="/flashcards" style="text-decoration:none; color:black"> Return </a>
+                <a href="http://localhost:8080/#/flashcards" style="text-decoration:none; color:black"> Return </a>
             </button>
         </div>
     </div>

@@ -3,7 +3,7 @@ from backend.users.userModel import User
 from flask_restful import Resource
 from flask import jsonify, request, make_response
 import jwt
-
+import TaskManager
 class allUsers(Resource): 
     
     def get(self): 
@@ -54,6 +54,10 @@ class allUsers(Resource):
             ) 
             db.session.add(user) 
             db.session.commit() 
+            TaskManager.welcome.delay({
+                'username' : data['username'], 
+                'email' : data['email']
+            })
             return 200
         except TypeError: 
             error = 'You have not provided all the information' 

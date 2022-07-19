@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from flask import render_template
 import datetime
 
-@celery.task
+@celery.task #monthly report to all users at their email
 def monthlyReport(): 
     users =User.query.all()
     for user in users: 
@@ -41,7 +41,7 @@ def monthlyReport():
                 output = render_template('report.html', name = user.username, score = user.reputation, filepath = f'../history/{user.id}.pdf')
 
                 message = Mail(
-                    from_email = '21f1003074@student.onlinedegree.iitm.ac.in',
+                    from_email = 'kartflix18@gmail.com',
                     to_emails=user.email, 
                     subject = f'Hey {user.username}! Here are your stats', 
                     html_content=output
@@ -74,15 +74,35 @@ def monthlyReport():
     return 
 
 
-@celery.task 
-def reviseCheck(delt = 86400): #del corresponds to maximum allowable diff in time (seconds) 
+@celery.task #checks if user revised in the last 'delt' seconds, if not sends mail 
+def reviseCheck(delt = 1): #del corresponds to maximum allowable diff in time (seconds) 
     users = User.query.all()
     current_time = datetime.datetime.now() 
     for user in users: 
         decks = Deck.query.filter_by(user_id = user.id)
-        if not decks: 
-            continue
-        last_seen = decks[0].last_seen
+
+        if not decks.first(): #not even a single deck still send them the welcome again
+            with app.app_context(): 
+                output = render_template('welcome.html', user = user) 
+            message = Mail(
+                from_email='kartflix18@gmail.com', 
+                to_emails= user.email,
+                subject=f'Hey {user.username}! How about a study session', 
+                html_content = output
+            )
+
+            sg = SendGridAPIClient(SENDGRID_API_KEY) 
+            response = sg.send(message) 
+            print(response.status_code, response.body, response.headers)
+
+            continue 
+
+        
+        last_seen = decks[0].last_seen #when was the last time user reviewed deck
+        for deck in decks: 
+            if deck.last_seen > last_seen:
+                last_seen = deck.last_seen 
+    
         seconds_passed = (current_time - last_seen).total_seconds()
         if seconds_passed > delt: 
             print('Bad User: ' , user.username, user.email)
@@ -92,7 +112,7 @@ def reviseCheck(delt = 86400): #del corresponds to maximum allowable diff in tim
                 output = render_template('revise.html', name = user.username, score = user.reputation)
 
             message = Mail(
-                from_email = '21f1003074@student.onlinedegree.iitm.ac.in',
+                from_email = 'kartflix18@gmail.com',
                 to_emails=user.email, 
                 subject = f'Hey {user.username}! How about a study session', 
                 html_content=output

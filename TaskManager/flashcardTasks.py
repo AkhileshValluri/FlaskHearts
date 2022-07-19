@@ -59,7 +59,7 @@ def sendCards(did, uid, csv = None, html = None):
     user = User.query.filter_by(id = uid).first() 
     deck = Deck.query.filter_by(id = did).first()
     message = Mail(
-        from_email = '21f1003074@student.onlinedegree.iitm.ac.in',
+        from_email = 'kartflix18@gmail.com',
         to_emails = user.email,
         subject = f'Exporting {deck.name} as a csv and html file', 
         plain_text_content='Please find below the attachments of the deck in the formats of csv and html', 
