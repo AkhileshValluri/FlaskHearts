@@ -2,8 +2,7 @@
     <nav class="navbar navbar-expand-lg bg-light">
         <div class="container-fluid">
             <router-link class="navbar-brand" to="/">
-                <img src="/docs/5.2/assets/brand/bootstrap-logo.svg" alt="" width="30" height="24"
-                    class="d-inline-block align-text-top">
+                <img src="../assets/logo.svg" alt="" width="30" height="24" class="d-inline-block align-text-top">
                 Flask-Hearts
             </router-link>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"

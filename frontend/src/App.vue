@@ -1,9 +1,9 @@
 <template>
   <NavBar> </NavBar>
+  <ErrorMessage></ErrorMessage>
   <div id="viewele">
     <router-view> </router-view>
   </div>
-  <ErrorMessage></ErrorMessage>
 </template>
 
 <script>

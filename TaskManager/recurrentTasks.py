@@ -75,7 +75,7 @@ def monthlyReport():
 
 
 @celery.task #checks if user revised in the last 'delt' seconds, if not sends mail 
-def reviseCheck(delt = 1): #del corresponds to maximum allowable diff in time (seconds) 
+def reviseCheck(delt = 100): #del corresponds to maximum allowable diff in time (seconds) 
     users = User.query.all()
     current_time = datetime.datetime.now() 
     for user in users: 

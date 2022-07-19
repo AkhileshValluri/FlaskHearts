@@ -1,7 +1,7 @@
 <template>
+
+
     <div class="row">
-
-
         <div v-for="(deck, index) in this.$store.state.card.cards" v-bind:key="deck.id" class='column'>
 
             <div class="card mx-5 " style="width:100%; background-color: whitesmoke">
@@ -50,6 +50,13 @@
         </div>
         <div style="width:100%">
             <AddCard v-bind:did=this.deckid></AddCard>
+
+            <span style=" width:100%" @click="">
+                <button type="button" class="btn btn-outline-info" @click="exportDeck(1)">Export Deck as HTML</button>
+                <button type="button" class="btn btn-outline-info" @click="exportDeck(0)">Export Deck as CSV</button>
+
+            </span>
+            <br>
         </div>
 
     </div>
@@ -59,6 +66,7 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import AddCard from '@/components/AddCard.vue'
 import CardEdit from '@/components/CardEdit.vue'
+import ErrorMessage from '@/components/ErrorMessage.vue'
 
 export default {
     name: 'CardView',
@@ -82,6 +90,37 @@ export default {
         },
         clickEdit() {
 
+        },
+        async exportDeck(type) {
+            const axios = require('axios');
+            const axiosInstance = axios.create({
+                baseURL: 'http://localhost:5000/flashcards',
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'token': document.cookie.split(';').length > 1 ? document.cookie.split(';')[1] : document.cookie.split(';')[0]
+                }
+            })
+
+            if (type) {
+                //export as HTML
+                let res = await axiosInstance.get('/html/' + this.deckid)
+                let info = 'Your deck should be emailed as html shortly'
+                if (res.status === 200) {
+                } else {
+                    let info = 'Something went wrong'
+                }
+                this.$store.commit('setError', info)
+            } else {
+                let res = await axiosInstance.get('/csv/' + this.deckid)
+                let info = 'Your deck should be emailed as csv shortly'
+                if (res.status === 200) {
+                } else {
+                    let info = 'Something went wrong'
+                }
+                this.$store.commit('setError', info);
+            }
+
         }
     },
     mounted() {
@@ -97,7 +136,8 @@ export default {
     },
     components: {
         AddCard,
-        CardEdit
+        CardEdit,
+        ErrorMessage
     }
 }
 

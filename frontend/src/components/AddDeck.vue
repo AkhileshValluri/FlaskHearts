@@ -71,7 +71,7 @@ export default {
             axios.post('http://localhost:5000/flashcards/import', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    'token': document.cookie.split(';')[1]
+                    'token': document.cookie.split(';').length > 1 ? document.cookie.split(';')[1] : document.cookie.split(';')[0]
                 }
             })
                 .then(res => console.log(res.data))
